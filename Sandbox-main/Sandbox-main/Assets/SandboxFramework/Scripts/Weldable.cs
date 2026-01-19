@@ -19,16 +19,34 @@ public class Weldable : MonoBehaviour
     private WeldType currentWeldType = WeldType.Undefined;
     private readonly HashSet<Weldable> connections = new();
 
+    // Joints created for physics-based welds. We track them so they can be cleaned up and so
+    // a joint break can be handled.
+    private readonly Dictionary<Weldable, List<Joint>> physicsJoints = new();
+
+    [Header("Weld Settings")]
+    [Tooltip("If true, this component will attempt an automatic weld to the first parent Weldable found on Start.")]
+    public bool allowAutoWeld = false;
+
+    [Tooltip("Break force applied to created FixedJoint(s). If an enemy or other physics interaction exceeds this, the joint will break.")]
+    public float jointBreakForce = 1f;
+
+    [Tooltip("Break torque applied to created FixedJoint(s).")]
+    public float jointBreakTorque = 1f;
+
     public WeldType weldType => currentWeldType;
 
     private IEnumerator Start()
     {
+        // Delay one frame so other components (like Rigidbody) have initialized.
         yield return null;
-        TryAutoHierarchyWeldWithAncestor();
+
+        if (allowAutoWeld)
+            TryAutoHierarchyWeldWithAncestor();
     }
 
     /// <summary>
     /// Attempts to automatically weld this object to the first parent Weldable found in the hierarchy.
+    /// The auto-weld chooses physics-based if either side has a Rigidbody.
     /// </summary>
     private void TryAutoHierarchyWeldWithAncestor()
     {
@@ -39,7 +57,9 @@ public class Weldable : MonoBehaviour
             var parentWeldable = current.GetComponent<Weldable>();
             if (parentWeldable != null && !IsConnected(parentWeldable))
             {
-                WeldTo(parentWeldable, WeldType.HierarchyBased, true);
+                // Choose a weld type that is compatible with rigidbodies.
+                WeldType chosen = ChooseAppropriateWeldType(parentWeldable, WeldType.HierarchyBased);
+                WeldTo(parentWeldable, chosen, true);
                 break;
             }
 
@@ -48,7 +68,26 @@ public class Weldable : MonoBehaviour
     }
 
     /// <summary>
-    /// Welds this object to a target using the specified weld type.
+    /// Public helper for player-initiated welding. The API will pick a safe weld type (physics when either side has Rigidbody).
+    /// Use this from your building/placement code when the player places a block.
+    /// </summary>
+    public void WeldByPlayerTo(Weldable target, Transform overlappingTransform = null)
+    {
+        if (target == null) return;
+        WeldType chosen = ChooseAppropriateWeldType(target, WeldType.HierarchyBased);
+        WeldTo(target, chosen, false, overlappingTransform);
+    }
+
+    /// <summary>
+    /// Public helper for unwelding by player.
+    /// </summary>
+    public void UnweldByPlayer()
+    {
+        Unweld();
+    }
+
+    /// <summary>
+    /// Internal weld function. It will attempt to set compatible types on both objects and apply the chosen weld.
     /// </summary>
     internal void WeldTo(Weldable target, WeldType weldType, bool isAutoWeld = false, Transform overlappingTransform = null)
     {
@@ -58,6 +97,9 @@ public class Weldable : MonoBehaviour
         bool wasIsolated = connections.Count == 0;
         bool targetWasIsolated = target.connections.Count == 0;
 
+        // If requested HierarchyBased but either has a Rigidbody, switch to PhysicsBased for safety.
+        weldType = ChooseAppropriateWeldType(target, weldType);
+
         if (!TrySetWeldType(weldType) || !target.TrySetWeldType(weldType))
         {
             Debug.LogWarning($"Weld failed: type mismatch ({name} ↔ {target.name})");
@@ -66,20 +108,16 @@ public class Weldable : MonoBehaviour
 
         if (IsConnected(target))
         {
-            Debug.LogWarning("Already connected");
+            Debug.LogWarning($"{name} and {target.name} are already connected.");
             return;
-        }
-
-        if (target.IsConnected(this))
-        {
-            Debug.LogError("One-sided connection detected");
         }
 
         AddConnection(target);
         target.AddConnection(this);
 
-        if (weldType == WeldType.HierarchyBased && !isAutoWeld)
+        if (weldType == WeldType.HierarchyBased)
         {
+            // For hierarchy welding we parent this under the target (or the overlappingTransform if supplied).
             ApplyHierarchyWeld(target, overlappingTransform);
         }
         else if (weldType == WeldType.PhysicsBased)
@@ -112,6 +150,26 @@ public class Weldable : MonoBehaviour
                 bool connectionIsIsolatedAfterUnweld = connection.connections.Count == 0;
                 connection.NotifyOnUnweld(connectionIsIsolatedAfterUnweld);
             }
+
+            // Remove any physics joints we created for this connection
+            if (physicsJoints.TryGetValue(connection, out var jointList))
+            {
+                foreach (var joint in jointList)
+                {
+                    if (joint != null) Destroy(joint);
+                }
+                physicsJoints.Remove(connection);
+            }
+
+            // Also remove entries on the other side if present
+            if (connection.physicsJoints != null && connection.physicsJoints.TryGetValue(this, out var otherJointList))
+            {
+                foreach (var joint in otherJointList)
+                {
+                    if (joint != null) Destroy(joint);
+                }
+                connection.physicsJoints.Remove(this);
+            }
         }
 
         if (currentWeldType == WeldType.HierarchyBased)
@@ -120,6 +178,8 @@ public class Weldable : MonoBehaviour
             RemovePhysicsWelds(connections);
 
         connections.Clear();
+        physicsJoints.Clear();
+
         if (connections.Count < 1) currentWeldType = WeldType.Undefined;
     }
 
@@ -130,6 +190,7 @@ public class Weldable : MonoBehaviour
     {
         Transform targetTransform = overlappingTransform ?? target.transform;
 
+        // Reparent any weldable ancestors so the group becomes a clean chain under the target.
         if (transform.parent != null)
         {
             ReparentWeldableAncestors();
@@ -139,18 +200,31 @@ public class Weldable : MonoBehaviour
     }
 
     /// <summary>
-    /// Applies physics-based welding using custom joints.
+    /// Applies physics-based welding using FixedJoint components that are breakable.
     /// </summary>
     private void ApplyPhysicsWeld(Weldable target)
     {
         Rigidbody thisRb = GetOrAddRigidbody(gameObject);
         Rigidbody targetRb = GetOrAddRigidbody(target.gameObject);
 
-        CustomFixedJoint joint = gameObject.AddComponent<CustomFixedJoint>();
-        joint.targetTransform = target.transform;
+        // Create a joint on this object connected to the target rb
+        FixedJoint joint = gameObject.AddComponent<FixedJoint>();
+        joint.connectedBody = targetRb;
+        joint.breakForce = jointBreakForce;
+        joint.breakTorque = jointBreakTorque;
 
-        CustomFixedJoint joint2 = target.gameObject.AddComponent<CustomFixedJoint>();
-        joint2.targetTransform = transform;
+        // Optionally create a symmetric joint on the target to make cleanup/detection simpler
+        FixedJoint jointOnTarget = target.gameObject.AddComponent<FixedJoint>();
+        jointOnTarget.connectedBody = thisRb;
+        jointOnTarget.breakForce = jointBreakForce;
+        jointOnTarget.breakTorque = jointBreakTorque;
+
+        // Track joints so they can be removed later
+        if (!physicsJoints.TryGetValue(target, out var list)) physicsJoints[target] = list = new List<Joint>();
+        list.Add(joint);
+
+        if (!target.physicsJoints.TryGetValue(this, out var otherList)) target.physicsJoints[this] = otherList = new List<Joint>();
+        otherList.Add(jointOnTarget);
     }
 
     /// <summary>
@@ -158,6 +232,7 @@ public class Weldable : MonoBehaviour
     /// </summary>
     private void RemoveHierarchyWelds(IEnumerable<Weldable> connected)
     {
+        // If this was parented under someone, unparent ourselves and any children that were part of the weld
         List<Weldable> children = GetChildWeldables();
         transform.SetParent(null, true);
 
@@ -168,22 +243,43 @@ public class Weldable : MonoBehaviour
     }
 
     /// <summary>
-    /// Removes physics-based welds by destroying joint components.
+    /// Removes physics-based welds by destroying joint components we created.
     /// </summary>
     private void RemovePhysicsWelds(IEnumerable<Weldable> connected)
     {
         foreach (var other in connected)
         {
-            foreach (var joint in other.GetComponents<CustomFixedJoint>())
+            if (physicsJoints.TryGetValue(other, out var list))
             {
-                if (joint.targetTransform == transform)
-                    Destroy(joint);
+                foreach (var joint in list)
+                {
+                    if (joint != null) Destroy(joint);
+                }
+            }
+
+            if (other.physicsJoints.TryGetValue(this, out var otherList))
+            {
+                foreach (var joint in otherList)
+                {
+                    if (joint != null) Destroy(joint);
+                }
             }
         }
 
-        foreach (var joint in GetComponents<CustomFixedJoint>())
+        // Clean up any joints left on this object that target a now-removed connection
+        foreach (var joint in GetComponents<Joint>())
         {
-            Destroy(joint);
+            // If a joint is left with a null connectedBody or connected to something not in connections, destroy it
+            if (joint == null) continue;
+            if (joint.connectedBody == null) Destroy(joint);
+            else
+            {
+                Weldable connectedWeldable = joint.connectedBody.GetComponentInParent<Weldable>();
+                if (connectedWeldable == null || !connections.Contains(connectedWeldable))
+                {
+                    Destroy(joint);
+                }
+            }
         }
     }
 
@@ -208,8 +304,8 @@ public class Weldable : MonoBehaviour
             current = current.parent;
         }
 
-        foreach (Transform transform in weldableAncestors)
-            transform.SetParent(null, true);
+        foreach (Transform t in weldableAncestors)
+            t.SetParent(null, true);
 
         for (int i = weldableAncestors.Count - 1; i > 0; i--)
             weldableAncestors[i].SetParent(weldableAncestors[i - 1], true);
@@ -399,5 +495,31 @@ public class Weldable : MonoBehaviour
             listener.OnRemoved();
             if (leavedWeldGroup) listener.OnUnweld();
         }
+    }
+
+    /// <summary>
+    /// Helper to pick a weld type that is safe given rigidbodies on either side.
+    /// If either side has a Rigidbody, prefer PhysicsBased welds.
+    /// </summary>
+    private WeldType ChooseAppropriateWeldType(Weldable target, WeldType preferred)
+    {
+        bool thisHasRb = GetComponentInChildren<Rigidbody>() != null;
+        bool targetHasRb = target.GetComponentInChildren<Rigidbody>() != null;
+
+        if (thisHasRb || targetHasRb)
+            return WeldType.PhysicsBased;
+
+        return preferred;
+    }
+
+    /// <summary>
+    /// Unity callback when any joint on this GameObject breaks due to exceeding breakForce / breakTorque.
+    /// We respond by unwelding this object (the physics joint has already been destroyed by Unity).
+    /// </summary>
+    private void OnJointBreak(float breakForce)
+    {
+        // When a joint breaks, Unity calls this on the GameObject that owned the joint.
+        // The simplest robust behavior is to unweld this object so the group separates.
+        Unweld();
     }
 }

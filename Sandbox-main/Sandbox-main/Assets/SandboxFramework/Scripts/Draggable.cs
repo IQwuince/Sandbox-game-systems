@@ -14,12 +14,32 @@ public enum RigidbodyStateChange
 [DisallowMultipleComponent]
 public class Draggable : MonoBehaviour
 {
+    [Header("Drag Settings")]
     public bool shouldPropagateDragEvents = true;
     public bool shouldIgnoreRigidbodySettingFromDragger = false;
     public bool removeFromParentAtAwake = false;
+
+    [Header("Grid Snapping")]
+    [Tooltip("If true the object will snap to a grid while dragging or on release depending on Snap On Release Only.")]
+    public bool useGridSnapping = false;
+    [Tooltip("World grid cell size. Use 0 for an axis to skip snapping on that axis.")]
+    public Vector3 gridSize = Vector3.one;
+    [Tooltip("If true, snapping is applied only when the drag ends (on release).")]
+    public bool snapOnReleaseOnly = false;
+
+    [Header("Rotation Snapping")]
+    [Tooltip("Snap rotation while dragging / on release.")]
+    public bool snapRotation = false;
+    [Tooltip("Angle step in degrees used for rotation snapping on each axis.")]
+    public Vector3 rotationSnapAngle = new Vector3(90f, 90f, 90f);
+
     private bool isBeingDragged = false;
     private Rigidbody rigidBody;
     private Vector3 throwVelocity = Vector3.zero;
+
+    // Track previous target position for stable velocity calculation
+    private Vector3 lastTargetPosition;
+
     void Awake()
     {
         if (removeFromParentAtAwake)
@@ -40,6 +60,9 @@ public class Draggable : MonoBehaviour
         rigidBody = GetComponent<Rigidbody>();
         OnGrab();
         isBeingDragged = true;
+
+        // initialize lastTargetPosition so first velocity sample is stable
+        lastTargetPosition = transform.position;
 
         ApplyRigidbodyStateChange(stateChange);
     }
@@ -66,25 +89,39 @@ public class Draggable : MonoBehaviour
         }
 
         foreach (var rb in rigidbodies)
-            {
-                if (rb == null) continue;
-                rb.isKinematic = (stateChange == RigidbodyStateChange.SetKinematic);
-            }
-    }    
-    
+        {
+            if (rb == null) continue;
+            rb.isKinematic = (stateChange == RigidbodyStateChange.SetKinematic);
+        }
+    }
+
     /// <summary>
     /// Updates the object's position and rotation during dragging.
+    /// Call this with the desired world-space position and rotation for the dragged object.
     /// </summary>
-    public void UpdateDrag(Vector3 position, Quaternion rotation)
+    public void UpdateDrag(Vector3 targetPosition, Quaternion targetRotation)
     {
         if (!enabled || !isBeingDragged) return;
 
-        if (rigidBody != null)
+        // Velocity measurement based on change in target position (not rigidbody position)
+        float dt = Time.deltaTime;
+        if (dt <= 0f) dt = Time.fixedDeltaTime;
+
+        Vector3 measuredVelocity = (targetPosition - lastTargetPosition) / dt;
+        throwVelocity = Vector3.Lerp(throwVelocity, measuredVelocity, 0.1f);
+        lastTargetPosition = targetPosition;
+
+        // If grid snapping is enabled and not only on release, apply snapping to the target before moving.
+        Vector3 appliedPosition = targetPosition;
+        Quaternion appliedRotation = targetRotation;
+
+        if (useGridSnapping && !snapOnReleaseOnly)
         {
-            throwVelocity = throwVelocity * 0.9f + ((position - rigidBody.position) / Time.deltaTime) * 0.1f;
+            appliedPosition = GetSnappedPosition(targetPosition);
+            if (snapRotation) appliedRotation = GetSnappedRotation(targetRotation);
         }
 
-        ApplyTransformation(position, rotation);
+        ApplyTransformation(appliedPosition, appliedRotation);
         CustomFixedJoint.UpdateJoint(transform);
     }
 
@@ -134,6 +171,7 @@ public class Draggable : MonoBehaviour
     /// </summary>
     private void MoveRigidbody(Vector3 position, Quaternion rotation)
     {
+        // Use MovePosition / MoveRotation to let physics apply interpolated movement
         rigidBody.MoveRotation(rotation);
         rigidBody.MovePosition(position);
     }
@@ -146,6 +184,34 @@ public class Draggable : MonoBehaviour
         if (!enabled) return;
 
         OnRelease();
+
+        // Apply snapping on release if configured
+        if (useGridSnapping && snapOnReleaseOnly)
+        {
+            Vector3 snappedPosition = GetSnappedPosition(transform.position);
+            Quaternion snappedRotation = snapRotation ? GetSnappedRotation(transform.rotation) : transform.rotation;
+
+            if (rigidBody != null)
+            {
+                // Move rigidbody to snapped transform immediately using MovePosition/MoveRotation.
+                rigidBody.MovePosition(snappedPosition);
+                rigidBody.MoveRotation(snappedRotation);
+            }
+            else
+            {
+                if (transform.parent == null)
+                {
+                    transform.position = snappedPosition;
+                    transform.rotation = snappedRotation;
+                }
+                else
+                {
+                    // If parented, reapply using the same method as MoveTransform to keep hierarchy consistent
+                    MoveTransform(snappedPosition, snappedRotation);
+                }
+            }
+        }
+
         ApplyRigidbodyStateChange(stateChange);
         isBeingDragged = false;
 
@@ -156,8 +222,33 @@ public class Draggable : MonoBehaviour
             {
                 newThrowVelocity = newThrowVelocity.normalized * maxThrowVelocity;
             }
+
+            // Apply measured throw velocity to physics
             rigidBody.linearVelocity = newThrowVelocity;
         }
+
+        // Reset for next drag
+        throwVelocity = Vector3.zero;
+    }
+
+    // Utility: Snap a world position to the configured grid
+    private Vector3 GetSnappedPosition(Vector3 worldPos)
+    {
+        // Avoid division by zero per-axis: if gridSize component <= 0 we skip snapping that axis.
+        float x = (gridSize.x > 0f) ? Mathf.Round(worldPos.x / gridSize.x) * gridSize.x : worldPos.x;
+        float y = (gridSize.y > 0f) ? Mathf.Round(worldPos.y / gridSize.y) * gridSize.y : worldPos.y;
+        float z = (gridSize.z > 0f) ? Mathf.Round(worldPos.z / gridSize.z) * gridSize.z : worldPos.z;
+        return new Vector3(x, y, z);
+    }
+
+    // Utility: Snap a rotation to the configured angle steps (per-axis)
+    private Quaternion GetSnappedRotation(Quaternion rot)
+    {
+        Vector3 e = rot.eulerAngles;
+        float sx = (rotationSnapAngle.x > 0f) ? Mathf.Round(e.x / rotationSnapAngle.x) * rotationSnapAngle.x : e.x;
+        float sy = (rotationSnapAngle.y > 0f) ? Mathf.Round(e.y / rotationSnapAngle.y) * rotationSnapAngle.y : e.y;
+        float sz = (rotationSnapAngle.z > 0f) ? Mathf.Round(e.z / rotationSnapAngle.z) * rotationSnapAngle.z : e.z;
+        return Quaternion.Euler(sx, sy, sz);
     }
 
     /// <summary>

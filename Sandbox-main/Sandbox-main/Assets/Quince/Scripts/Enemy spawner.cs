@@ -1,27 +1,30 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-
-public class Enemyspawner : MonoBehaviour
+public class EnemySpawner : MonoBehaviour
 {
+    public enum WaveState { Inactive, Active, Remaining }
+
     [Header("Spawn Settings")]
     public GameObject enemyPrefab;
     public List<BoxCollider> spawnBoxes = new List<BoxCollider>();
     public AnimationCurve enemiesPerWaveCurve; // X: waveIndex, Y: enemyCount
     public AnimationCurve waveDurationCurve;   // X: waveIndex, Y: seconds
+    [Tooltip("If true you can start a new wave while previous wave still has enemies -> Remaining state used.")]
+    public bool allowRemainingState = true;
 
     [Header("UI")]
     public TMP_Text roundText;
-    public TMP_Text waveStatusText;
+    public TMP_Text waveStatusText;   // will show: "Wave: Active/Remaining/Inactive"
+    public TMP_Text enemiesLeftText;  // shows number of enemies remaining
 
     private int currentWave = 0;
-    private bool waveActive = false;
-    private int enemiesToSpawn = 0;
-    private int enemiesSpawned = 0;
-    private int enemiesAlive = 0;
+    private WaveState state = WaveState.Inactive;
+
+    // Tracking enemies
+    private HashSet<GameObject> liveEnemies = new HashSet<GameObject>();
 
     private void Start()
     {
@@ -30,7 +33,8 @@ public class Enemyspawner : MonoBehaviour
 
     private void Update()
     {
-        if (!waveActive && Input.GetKeyDown(KeyCode.P))
+        // Example input to start next wave
+        if (Input.GetKeyDown(KeyCode.P))
         {
             StartNextWave();
         }
@@ -38,17 +42,23 @@ public class Enemyspawner : MonoBehaviour
 
     public void StartNextWave()
     {
-        if (waveActive) return;
+        // Disallow starting a new wave when an active wave is running
+        if (state == WaveState.Active) return;
+
+        // If in Remaining state but Remaining is disabled, disallow starting
+        if (state == WaveState.Remaining && !allowRemainingState) return;
 
         currentWave++;
-        waveActive = true;
+        state = WaveState.Active;
         UpdateUI();
 
-        // Use animation curve directly for enemy count
-        enemiesToSpawn = Mathf.RoundToInt(enemiesPerWaveCurve.Evaluate(currentWave));
+        Debug.Log($"Wave {currentWave} started.");
+
+        // Determine counts/duration from curves
+        int enemiesToSpawn = Mathf.RoundToInt(enemiesPerWaveCurve.Evaluate(currentWave));
         float waveDuration = waveDurationCurve.Evaluate(currentWave);
 
-        // Distribute enemies randomly among spawn boxes
+        // Distribute enemies across boxes
         int[] boxEnemyCounts = RandomlyDistribute(enemiesToSpawn, spawnBoxes.Count);
 
         StartCoroutine(SpawnWave(boxEnemyCounts, waveDuration));
@@ -56,32 +66,51 @@ public class Enemyspawner : MonoBehaviour
 
     private IEnumerator SpawnWave(int[] boxEnemyCounts, float duration)
     {
-        enemiesSpawned = 0;
-        enemiesAlive = 0;
         int totalToSpawn = 0;
-        foreach (int count in boxEnemyCounts) totalToSpawn += count;
+        foreach (int c in boxEnemyCounts) totalToSpawn += c;
 
-        float spawnInterval = duration / Mathf.Max(totalToSpawn, 1);
+        // Avoid division by zero
+        float spawnInterval = (totalToSpawn > 0) ? (duration / totalToSpawn) : 0f;
 
+        // Spawn across boxes (sequentially per-box)
         for (int boxIdx = 0; boxIdx < spawnBoxes.Count; boxIdx++)
         {
             for (int i = 0; i < boxEnemyCounts[boxIdx]; i++)
             {
                 SpawnEnemyInBox(spawnBoxes[boxIdx]);
-                enemiesSpawned++;
-                enemiesAlive++;
-                yield return new WaitForSeconds(spawnInterval);
+                yield return spawnInterval > 0f ? new WaitForSeconds(spawnInterval) : null;
             }
         }
 
-        // Wait until all enemies are dead (implement your own enemy death tracking)
-        while (enemiesAlive > 0)
+        // Spawning phase finished, now decide what to do according to allowRemainingState
+        if (allowRemainingState)
         {
-            yield return null;
+            // If no live enemies remain, immediately finish
+            if (liveEnemies.Count == 0)
+            {
+                state = WaveState.Inactive;
+                Debug.Log($"Wave {currentWave} ended (no remaining enemies).");
+            }
+            else
+            {
+                state = WaveState.Remaining;
+                Debug.Log($"Wave {currentWave} ended (remaining enemies: {liveEnemies.Count}).");
+            }
+            UpdateUI();
+            yield break;
         }
-
-        waveActive = false;
-        UpdateUI();
+        else
+        {
+            // Wait until all enemies are dead before marking inactive (you cannot start a new wave while waiting)
+            while (liveEnemies.Count > 0)
+            {
+                yield return null;
+            }
+            state = WaveState.Inactive;
+            UpdateUI();
+            Debug.Log($"Wave {currentWave} ended (all enemies dead).");
+            yield break;
+        }
     }
 
     private void SpawnEnemyInBox(BoxCollider box)
@@ -95,8 +124,54 @@ public class Enemyspawner : MonoBehaviour
         );
         Vector3 spawnPos = center + box.transform.rotation * localPos;
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-        // Optionally, subscribe to enemy death event to decrement enemiesAlive
-        // Example: enemy.GetComponent<Enemy>().OnDeath += () => enemiesAlive--;
+
+        // Register enemy with the spawner so it is tracked in the HashSet
+        RegisterEnemy(enemy);
+
+        // Attach an EnemyNotifier only if the prefab doesn't already contain one
+        EnemyNotifier notifier = enemy.GetComponent<EnemyNotifier>();
+        if (notifier == null)
+        {
+            enemy.AddComponent<EnemyNotifier>();
+        }
+        // EnemyNotifier will auto-find the spawner (it keeps a private reference)
+    }
+
+    // Adds an enemy to the HashSet and updates UI
+    public void RegisterEnemy(GameObject enemy)
+    {
+        if (enemy == null) return;
+        if (liveEnemies.Add(enemy))
+        {
+            UpdateUI();
+        }
+    }
+
+    // Removes an enemy (called by EnemyNotifier.OnDestroy or from enemy death logic)
+    public void UnregisterEnemy(GameObject enemy)
+    {
+        if (enemy == null) return;
+        if (liveEnemies.Remove(enemy))
+        {
+            UpdateUI();
+
+            // If we were in Active or Remaining and now have zero enemies, handle state transitions
+            if (liveEnemies.Count == 0)
+            {
+                if (state == WaveState.Remaining)
+                {
+                    state = WaveState.Inactive;
+                    UpdateUI();
+                    Debug.Log($"All remaining enemies from previous waves are dead. State -> Inactive.");
+                }
+                else if (state == WaveState.Active && !allowRemainingState)
+                {
+                    state = WaveState.Inactive;
+                    UpdateUI();
+                    Debug.Log($"All enemies dead. Wave {currentWave} ended. State -> Inactive.");
+                }
+            }
+        }
     }
 
     private int[] RandomlyDistribute(int total, int boxes)
@@ -111,7 +186,7 @@ public class Enemyspawner : MonoBehaviour
             }
             else
             {
-                int val = Random.Range(0, remaining + 1);
+                int val = (remaining > 0) ? Random.Range(0, remaining + 1) : 0;
                 result[i] = val;
                 remaining -= val;
             }
@@ -121,13 +196,14 @@ public class Enemyspawner : MonoBehaviour
 
     private void UpdateUI()
     {
-        roundText.text = $"Round: {currentWave}";
-        waveStatusText.text = waveActive ? "Wave Active" : "Wave Inactive";
+        if (roundText) roundText.text = $"Round: {currentWave}";
+        if (waveStatusText) waveStatusText.text = $"Wave: {state}";
+        if (enemiesLeftText) enemiesLeftText.text = $"Enemies: {liveEnemies.Count}";
     }
 
-    // Call this from your enemy's death logic
-    public void OnEnemyDeath()
+    // For compatibility: if your enemy has a death hook, you can call this from enemy code:
+    public void OnEnemyDeath(GameObject enemy)
     {
-        enemiesAlive--;
+        UnregisterEnemy(enemy);
     }
 }

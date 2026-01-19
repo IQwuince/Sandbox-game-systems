@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2080526035368978691}
   - component: {fileID: 1051311878097032212}
   - component: {fileID: 2502633098444587118}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: Slime
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,8 @@ GameObject:
   - component: {fileID: 7561889800910091375}
   - component: {fileID: 3606171025031911491}
   - component: {fileID: 6657391323631370427}
-  m_Layer: 3
+  - component: {fileID: 4730764329720503632}
+  m_Layer: 9
   m_Name: SlimeAgent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -208,6 +209,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &4730764329720503632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3219883534379807651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea0dabeec49c2934989f27232b64c9d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyNotifier
 --- !u!1 &6225940514013437509
 GameObject:
   m_ObjectHideFlags: 0
@@ -219,7 +232,7 @@ GameObject:
   - component: {fileID: 3176815960634165688}
   - component: {fileID: 269124911661936746}
   - component: {fileID: 8742597150396391058}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: EyeLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -308,7 +321,7 @@ GameObject:
   - component: {fileID: 1377954965623916718}
   - component: {fileID: 7645483113711185470}
   - component: {fileID: 81903935101888771}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: EyeRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -456,7 +469,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_IsActive
@@ -464,7 +477,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8052677790429725804, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -546,11 +559,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8052677790429725804, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8052677790429725804, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_IsActive
