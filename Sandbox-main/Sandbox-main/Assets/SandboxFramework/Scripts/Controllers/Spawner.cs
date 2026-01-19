@@ -25,7 +25,7 @@ public class Spawner : MonoBehaviour
     public void Spawn()
     {
         // Only proceed if this component is enabled
-        if (enabled)
+        if (enabled && PointManager.Instance.points > 0)
         {
             // Ensure spawnLocation is assigned, fallback to this transform if not
             if (spawnLocation == null)
@@ -62,6 +62,8 @@ public class Spawner : MonoBehaviour
 
             // Assign the spawned instance the same name as the prefab for clarity
             instance.name = prefab.name;
+
+            PointManager.Instance.AddPoints(-1);
         }
     }
 }

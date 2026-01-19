@@ -4,7 +4,7 @@ public class PointManager : MonoBehaviour
 {
     public static PointManager Instance { get; private set; }
 
-    private float points = 0f;
+    public float points = 0f;
 
     public TMPro.TextMeshPro pointsText;
 
