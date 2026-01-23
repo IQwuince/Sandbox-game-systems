@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6805642453126274652}
   - component: {fileID: 2178641465862561741}
   - component: {fileID: 319040096767001000}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: EyeRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -98,7 +98,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3632501320603456876}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,7 +135,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2384792467892724788}
   - component: {fileID: 7848519968916816306}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: HP bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -226,7 +226,7 @@ GameObject:
   - component: {fileID: 6078280554529739609}
   - component: {fileID: 4844840733063061772}
   - component: {fileID: 4671261685199586968}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: Slime
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,7 +316,7 @@ GameObject:
   - component: {fileID: 2387249820511217696}
   - component: {fileID: 6200390858363227370}
   - component: {fileID: 838132016589938691}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: Slime
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -421,7 +421,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4695967497528547644}
         m_TargetAssemblyTypeName: Variable, Assembly-CSharp
-        m_MethodName: SetChangePerSecond
+        m_MethodName: ChangeValue
         m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -433,19 +433,7 @@ MonoBehaviour:
         m_CallState: 2
   onConditionsFailed:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4695967497528547644}
-        m_TargetAssemblyTypeName: Variable, Assembly-CSharp
-        m_MethodName: SetChangePerSecond
-        m_Mode: 4
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   TimeToEvaluate: 0
   evaluationOrder: 0
   ProceedOrderOnResult: 2
@@ -510,7 +498,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7427339412813608583}
   - component: {fileID: 4695967497528547644}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: Health
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -606,7 +594,7 @@ GameObject:
   - component: {fileID: 2901467714574936866}
   - component: {fileID: 8437599119298273729}
   - component: {fileID: 6813065058706585498}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: EyeLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -697,7 +685,7 @@ GameObject:
   - component: {fileID: 987956626473638387}
   - component: {fileID: 3024543123972243242}
   - component: {fileID: 8235552203695057763}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: EnemyCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -813,7 +801,7 @@ GameObject:
   - component: {fileID: 3264996338349840788}
   - component: {fileID: 2024250878440800553}
   - component: {fileID: 2334129766976148617}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -888,7 +876,7 @@ GameObject:
   - component: {fileID: 7040826811147856961}
   - component: {fileID: 5025090576486357969}
   - component: {fileID: 473802589220380102}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1026,7 +1014,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_IsActive
@@ -1034,7 +1022,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8052677790429725804, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1120,7 +1108,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_IsActive
@@ -1128,7 +1116,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8052677790429725804, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8052677790429725804, guid: 91cb43d349ec14f188b69cac551992c4, type: 3}
       propertyPath: m_IsActive
