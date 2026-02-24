@@ -211,7 +211,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -529,7 +529,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -847,7 +847,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1165,7 +1165,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1285,9 +1285,11 @@ GameObject:
   - component: {fileID: 8114901518431069284}
   - component: {fileID: 2566180325807377674}
   - component: {fileID: 7099084638540719213}
-  - component: {fileID: -4411515209353150552}
-  - component: {fileID: -4531336272143071403}
-  - component: {fileID: -7619149754664950845}
+  - component: {fileID: 7286784222632872363}
+  - component: {fileID: 4421687858468550608}
+  - component: {fileID: 357417671938290974}
+  - component: {fileID: 5061793880514852823}
+  - component: {fileID: 1504751456520030269}
   m_Layer: 0
   m_Name: Trap
   m_TagString: Untagged
@@ -1303,7 +1305,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1450575667591060533}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: -0.7071068}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 1.93, y: 0.486, z: 0.5952}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1325,7 +1327,7 @@ Transform:
   - {fileID: 4689056391008645176}
   - {fileID: 8312987947069972037}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!33 &4641880983430208677
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1341,7 +1343,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1450575667591060533}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1358,8 +1360,7 @@ MeshRenderer:
   m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a5abddcc215a54407a44462f15987c10, type: 2}
+  m_Materials: []
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1424,7 +1425,7 @@ MonoBehaviour:
   onTriggerExitEvent:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &-4411515209353150552
+--- !u!114 &7286784222632872363
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1436,8 +1437,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c14a531c091ed47028b32c51846c2dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Selectable
-  objectDescription: spiky
---- !u!114 &-4531336272143071403
+  objectDescription: Spiky!
+--- !u!114 &4421687858468550608
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1449,7 +1450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1d8073f11874480a95687decfaf2ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Draggable
-  shouldPropagateDragEvents: 1
+  shouldPropagateDragEvents: 0
   shouldIgnoreRigidbodySettingFromDragger: 0
   removeFromParentAtAwake: 0
   useGridSnapping: 0
@@ -1457,7 +1458,7 @@ MonoBehaviour:
   snapOnReleaseOnly: 0
   snapRotation: 0
   rotationSnapAngle: {x: 90, y: 90, z: 90}
---- !u!54 &-7619149754664950845
+--- !u!54 &357417671938290974
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1482,8 +1483,61 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &5061793880514852823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1450575667591060533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a3fae231601849f0934ea0ba0a060d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine
+  startState: None
+  states: []
+--- !u!114 &1504751456520030269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1450575667591060533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c156756d4c41441b80700523b0a4027, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConditionalTrigger
+  conditions:
+  - conditionType: 0
+    value: Molotov
+    negate: 0
+  conditionLogic: 0
+  autoTrigger: 1
+  onConditionsMet:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onConditionsFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  TimeToEvaluate: 0
+  evaluationOrder: 0
+  ProceedOrderOnResult: 2
 --- !u!1 &2384373434791257042
 GameObject:
   m_ObjectHideFlags: 0
@@ -1695,7 +1749,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2013,7 +2067,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2331,7 +2385,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2649,7 +2703,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2967,7 +3021,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3285,7 +3339,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3603,7 +3657,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3921,7 +3975,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4239,7 +4293,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4557,7 +4611,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4875,7 +4929,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1381
+  m_VersionIndex: 1402
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
