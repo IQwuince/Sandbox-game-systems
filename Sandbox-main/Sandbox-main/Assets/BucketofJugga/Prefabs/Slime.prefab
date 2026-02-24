@@ -313,6 +313,7 @@ GameObject:
   - component: {fileID: 8016025070138451577}
   - component: {fileID: 5069928180008180069}
   - component: {fileID: 8405771829760619954}
+  - component: {fileID: 1505450424571424219}
   - component: {fileID: 2387249820511217696}
   - component: {fileID: 6200390858363227370}
   - component: {fileID: 838132016589938691}
@@ -437,6 +438,21 @@ MonoBehaviour:
   TimeToEvaluate: 0
   evaluationOrder: 0
   ProceedOrderOnResult: 2
+--- !u!114 &1505450424571424219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6634329507814540328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d61c25b0c29d3f498a5faff10e2c4de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlimeEffectManager
+  healthVar: {fileID: 0}
+  maxBurnDps: 25
+  burnStacksAdditively: 1
 --- !u!114 &2387249820511217696
 MonoBehaviour:
   m_ObjectHideFlags: 0

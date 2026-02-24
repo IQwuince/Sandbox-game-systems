@@ -5187,6 +5187,8 @@ GameObject:
   - component: {fileID: 5043830940957488655}
   - component: {fileID: 4127923552302901053}
   - component: {fileID: 2123281815492714848}
+  - component: {fileID: 3552311325274403345}
+  - component: {fileID: 5169045776224937143}
   m_Layer: 0
   m_Name: Molotov
   m_TagString: Untagged
@@ -5245,7 +5247,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: ce67c55c07119744abbcabec04122f59, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5349,3 +5351,46 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &3552311325274403345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7432722376173290613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53e2fa5cb62d34b6791bf62b1a4d1b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TriggerListener
+  onTriggerEnterEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  onTriggerStayEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  onTriggerExitEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &5169045776224937143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7432722376173290613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02028a52c444fd946b3ead2906af82fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MolotovBehaviour
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  radius: 3
+  directDamage: 15
+  destroyOnExplode: 1
+  burnDuration: 4
+  burnDamagePerSecond: 5
+  explosionVfxPrefab: {fileID: 0}
+  debugLogs: 0

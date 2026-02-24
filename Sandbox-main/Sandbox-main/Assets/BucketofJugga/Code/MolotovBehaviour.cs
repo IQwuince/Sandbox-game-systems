@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MolotovBehaviour : MonoBehaviour
@@ -8,17 +6,20 @@ public class MolotovBehaviour : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer; // set to Enemy in inspector
 
     [Header("Explosion")]
+    [SerializeField] private bool useAoe = true;
     [SerializeField] private float radius = 3f;
-    [SerializeField] private float directDamage = 15f; // applied once on explosion
+    [SerializeField] private float directDamage = 15f;
     [SerializeField] private bool destroyOnExplode = true;
 
     [Header("Burn (Damage Over Time)")]
     [SerializeField] private float burnDuration = 4f;
     [SerializeField] private float burnDamagePerSecond = 5f;
-    [SerializeField] private float burnTickRate = 10f; // ticks per second
 
     [Header("Optional VFX")]
     [SerializeField] private GameObject explosionVfxPrefab;
+
+    [Header("Debug")]
+    [SerializeField] private bool debugLogs = true;
 
     private bool exploded;
 
@@ -26,85 +27,110 @@ public class MolotovBehaviour : MonoBehaviour
     {
         if (exploded) return;
 
-        // explode if collide with Enemy layer
-        if (((1 << other.gameObject.layer) & enemyLayer) != 0)
-        {
-            Explode();
-        }
+        if (((1 << other.gameObject.layer) & enemyLayer) == 0)
+            return;
+
+        Explode(other);
     }
 
-    public void Explode()
+    private void Explode(Collider triggerHit)
     {
         if (exploded) return;
         exploded = true;
 
+        if (debugLogs)
+            Debug.Log($"[MolotovBehaviour] Explode triggered by '{triggerHit.name}' at {transform.position}");
+
         if (explosionVfxPrefab != null)
             Instantiate(explosionVfxPrefab, transform.position, Quaternion.identity);
 
-        // Find enemies in radius
-        Collider[] hits = Physics.OverlapSphere(transform.position, radius, enemyLayer, QueryTriggerInteraction.Collide);
-
-        // Apply immediate damage + start DoT per enemy
-        foreach (var hit in hits)
+        if (!useAoe)
         {
-            Variable healthVar = FindHealthVariable(hit.transform);
-            if (healthVar == null) continue;
-
-            if (directDamage != 0f)
-                healthVar.ChangeValue(-Mathf.Abs(directDamage));
-
-            if (burnDuration > 0f && burnDamagePerSecond > 0f)
-                StartCoroutine(BurnCoroutine(healthVar, burnDuration, burnDamagePerSecond, burnTickRate));
+            ApplyEffectsToHit(triggerHit);
         }
-
-        if (destroyOnExplode)
-            Destroy(gameObject);
         else
-            gameObject.SetActive(false);
+        {
+            Collider[] hits = Physics.OverlapSphere(transform.position, radius, enemyLayer, QueryTriggerInteraction.Collide);
+
+            if (debugLogs)
+                Debug.Log($"[MolotovBehaviour] OverlapSphere hits={hits.Length} radius={radius}");
+
+            // apply per-SLIME 
+            // track already-processed slimes.
+            System.Collections.Generic.HashSet<SlimeDefeat> processed = new System.Collections.Generic.HashSet<SlimeDefeat>();
+
+            foreach (var hit in hits)
+            {
+                var slimeDefeat = hit.GetComponentInParent<SlimeDefeat>();
+                if (slimeDefeat == null) continue;
+
+                if (!processed.Add(slimeDefeat)) continue; // already applied to this slime
+
+                ApplyEffectsToSlime(slimeDefeat.transform, hit.name);
+            }
+        }
+
+        if (destroyOnExplode) Destroy(gameObject);
+        else gameObject.SetActive(false);
     }
 
-    private IEnumerator BurnCoroutine(Variable healthVar, float duration, float dps, float tickRate)
+    private void ApplyEffectsToHit(Collider hit)
     {
-        // tickRate safety
-        float interval = (tickRate <= 0f) ? 0.1f : (1f / tickRate);
-        float elapsed = 0f;
-
-        // apply damage in small steps so it feels consistent.
-        while (elapsed < duration)
+        var slimeDefeat = hit.GetComponentInParent<SlimeDefeat>();
+        if (slimeDefeat == null)
         {
-            if (healthVar == null) yield break; // slime likely destroyed
+            if (debugLogs) Debug.LogWarning($"[MolotovBehaviour] Trigger hit '{hit.name}' had Enemy layer but no SlimeDefeat in parents.");
+            return;
+        }
 
-            float damageThisTick = dps * interval;
-            healthVar.ChangeValue(-Mathf.Abs(damageThisTick));
+        ApplyEffectsToSlime(slimeDefeat.transform, hit.name);
+    }
 
-            yield return new WaitForSeconds(interval);
-            elapsed += interval;
+    private void ApplyEffectsToSlime(Transform slimeTransform, string viaColliderName)
+    {
+        if (debugLogs)
+            Debug.Log($"[MolotovBehaviour] Applying effects to slime '{slimeTransform.name}' (via collider '{viaColliderName}').");
+
+        // Direct damage
+        Variable healthVar = FindHealthVariable(slimeTransform);
+        if (healthVar != null && directDamage != 0f)
+        {
+            float before = healthVar.value;
+            healthVar.ChangeValue(-Mathf.Abs(directDamage));
+            if (debugLogs)
+                Debug.Log($"[MolotovBehaviour] DirectDamage {directDamage}: health {before} -> {healthVar.value} on '{slimeTransform.name}'");
+        }
+        else if (debugLogs)
+        {
+            Debug.LogWarning($"[MolotovBehaviour] No Variable named 'Health' found under slime '{slimeTransform.name}'.");
+        }
+
+        // Burn
+        if (burnDuration > 0f && burnDamagePerSecond > 0f)
+        {
+            SlimeEffectManager effects = slimeTransform.GetComponent<SlimeEffectManager>();
+            if (effects != null)
+            {
+                effects.ApplyBurn(burnDamagePerSecond, burnDuration);
+                if (debugLogs)
+                    Debug.Log($"[MolotovBehaviour] Burn applied to '{slimeTransform.name}': {burnDamagePerSecond} dps for {burnDuration}s");
+            }
+            else if (debugLogs)
+            {
+                Debug.LogWarning($"[MolotovBehaviour] SlimeEffectManager missing on '{slimeTransform.name}'. (Also ensure file is named SlimeEffectManager.cs)");
+            }
         }
     }
 
-    private Variable FindHealthVariable(Transform hit)
+    private Variable FindHealthVariable(Transform slimeTransform)
     {
-        // search in parents/children around the hit collider.
-
-        // 1) try in root (common case)
-        Transform root = hit.root;
-
-        // include inactive in case health object is disabled:
-        Variable[] vars = root.GetComponentsInChildren<Variable>(true);
+        // Search within THIS slime's hierarchy only
+        Variable[] vars = slimeTransform.GetComponentsInChildren<Variable>(true);
         foreach (var v in vars)
         {
-            if (v != null && v.gameObject.name == "health")
+            if (v != null && v.gameObject.name == "Health")
                 return v;
         }
-
-        // 2) fallback: also try from the hit object
-        vars = hit.GetComponentsInChildren<Variable>(true);
-        foreach (var v in vars)
-        {
-            if (v != null && v.gameObject.name == "health")
-                return v;
-        }
-
         return null;
     }
 
