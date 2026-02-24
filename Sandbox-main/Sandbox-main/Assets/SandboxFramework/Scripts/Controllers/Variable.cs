@@ -61,6 +61,12 @@ public class Variable : MonoBehaviour
     private Animator animator = null;   // Reference to parent Animator component
     private string varName = "";        // The variable name, taken from GameObject name
     private float currentTime = 0f;     // Accumulates deltaTime to apply value changes per second
+    private ResetWaves resetWaves;
+
+    private void Start()
+    {
+        resetWaves = UnityEngine.Object.FindFirstObjectByType<ResetWaves>();
+    }
 
     /// <summary>
     /// Sets the rate of change per second for this variable.
@@ -126,8 +132,13 @@ public class Variable : MonoBehaviour
                 SetValue(value + changePerSecond * steps);
             }
         }
+
+        if (value <= 0)
+        {
+            resetWaves.Reset();
+        }
     }
-    
+
     /// <summary>
     /// Changes the variable's value by a relative amount, with clamping and event triggers.
     /// </summary>
@@ -163,13 +174,13 @@ public class Variable : MonoBehaviour
                 foreach (Condition condition in conditions)
                 {
                     bool wasTrue = EvaluateCondition(condition, oldValue);
-                    bool isTrue  = EvaluateCondition(condition, value);
+                    bool isTrue = EvaluateCondition(condition, value);
 
                     // Edge-trigger: only invoke when transitioning from false → true
                     if (!wasTrue && isTrue)
                     {
                         condition.OnEvaluateToTrue?.Invoke();
-                        
+
                         // NEW: Prioritized evaluation (stop-if-true logic)
                         if (condition.stopIfTrue)
                         {

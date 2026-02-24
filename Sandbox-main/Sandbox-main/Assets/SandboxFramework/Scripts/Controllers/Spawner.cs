@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using UnityEngine;
+using System.Collections.Generic;
 
 [DisallowMultipleComponent] // Prevents adding multiple Spawner components to the same GameObject
 public class Spawner : MonoBehaviour
@@ -6,6 +8,7 @@ public class Spawner : MonoBehaviour
     public Transform spawnLocation;
     // Array of prefabs to spawn from
     public GameObject[] prefabs;
+    public List<GameObject> spawnedObjects;
 
     // Scale factor to apply to the spawned object
     public float scale = 1f;
@@ -64,6 +67,7 @@ public class Spawner : MonoBehaviour
             instance.name = prefab.name;
 
             PointManager.Instance.AddPoints(-1);
+            spawnedObjects.Add(instance);
         }
     }
 }

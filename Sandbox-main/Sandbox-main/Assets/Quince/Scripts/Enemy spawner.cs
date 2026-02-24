@@ -20,11 +20,11 @@ public class EnemySpawner : MonoBehaviour
     public TMP_Text waveStatusText;   // will show: "Wave: Active/Remaining/Inactive"
     public TMP_Text enemiesLeftText;  // shows number of enemies remaining
 
-    private int currentWave = 0;
+    public int currentWave = 0;
     private WaveState state = WaveState.Inactive;
 
     // Tracking enemies
-    private HashSet<GameObject> liveEnemies = new HashSet<GameObject>();
+    public HashSet<GameObject> liveEnemies = new HashSet<GameObject>();
 
     private void Start()
     {
