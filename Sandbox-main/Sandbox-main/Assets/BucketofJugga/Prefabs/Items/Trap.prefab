@@ -1290,7 +1290,8 @@ GameObject:
   - component: {fileID: 357417671938290974}
   - component: {fileID: 5061793880514852823}
   - component: {fileID: 1504751456520030269}
-  m_Layer: 0
+  - component: {fileID: 1570980811794541469}
+  m_Layer: 10
   m_Name: Trap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1538,6 +1539,24 @@ MonoBehaviour:
   TimeToEvaluate: 0
   evaluationOrder: 0
   ProceedOrderOnResult: 2
+--- !u!114 &1570980811794541469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1450575667591060533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37cd9090ff8e18d41b52abb679938bb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SandboxItem
+  itemId: Spike
+  fusionDatabase: {fileID: 11400000, guid: 1a1c4db614bdfbd4a925a5bcf091edc5, type: 2}
+  itemLayerMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  armDelay: 0.1
 --- !u!1 &2384373434791257042
 GameObject:
   m_ObjectHideFlags: 0
