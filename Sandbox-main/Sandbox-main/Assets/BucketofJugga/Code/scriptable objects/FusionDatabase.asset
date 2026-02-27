@@ -21,4 +21,4 @@ MonoBehaviour:
     resultPrefab: {fileID: 5074816842808517252, guid: 0c895c22a186e004b8f56426cba859d1, type: 3}
   - itemA: Slow
     itemB: Spike
-    resultPrefab: {fileID: 0}
+    resultPrefab: {fileID: 7548772904014737875, guid: 8e370bd3bcdee9143a8aa289bcb360b2, type: 3}
