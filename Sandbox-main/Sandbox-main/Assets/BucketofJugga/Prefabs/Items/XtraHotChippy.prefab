@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1247026016682337957}
   - component: {fileID: 2664721360230022925}
   - component: {fileID: 1609474037683289149}
+  - component: {fileID: 4197780566363683609}
   - component: {fileID: -7151719204328073620}
   m_Layer: 10
   m_Name: XtraHotChippy
@@ -176,6 +177,29 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &4197780566363683609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 965667122023378735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02028a52c444fd946b3ead2906af82fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MolotovBehaviour
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  useAoe: 1
+  radius: 5
+  directDamage: 30
+  destroyOnExplode: 1
+  burnDuration: 6
+  burnDamagePerSecond: 6
+  explosionVfxPrefab: {fileID: 0}
+  debugLogs: 1
 --- !u!114 &-7151719204328073620
 MonoBehaviour:
   m_ObjectHideFlags: 0
