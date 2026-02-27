@@ -5413,4 +5413,4 @@ MonoBehaviour:
   itemLayerMask:
     serializedVersion: 2
     m_Bits: 1024
-  armDelay: 0.1
+  armDelay: 0.5
