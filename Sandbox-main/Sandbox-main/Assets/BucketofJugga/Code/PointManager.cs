@@ -6,8 +6,7 @@ public class PointManager : MonoBehaviour
 
     public float points = 0f;
 
-    public TMPro.TextMeshPro pointsText;
-
+    public TMPro.TextMeshProUGUI pointsText;
 
     private void Awake()
     {
