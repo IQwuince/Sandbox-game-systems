@@ -1807,9 +1807,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 618814686}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c156756d4c41441b80700523b0a4027, type: 3}
+  m_Script: {fileID: 11500000, guid: dd78a6f0b58e82b49acf94b505da2d37, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ConditionalTrigger
+  m_EditorClassIdentifier: Assembly-CSharp::ConditionalTriggerFix
   conditions:
   - conditionType: 2
     value: Enemy
