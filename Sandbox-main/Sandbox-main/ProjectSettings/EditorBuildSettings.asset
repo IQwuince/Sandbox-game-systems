@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/DemoScene.unity
-    guid: 4780313b5cf9241129557bb9cbf507f1
+    path: Assets/Scenes/Jurre test scene.unity
+    guid: 55b6e1145c0075d49b40b0e87075b2fc
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 5c0e022ed882d433e8b2e4027da38faf, type: 3}

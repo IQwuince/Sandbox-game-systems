@@ -5,6 +5,7 @@ using System.Collections.Generic;
 [DisallowMultipleComponent] // Prevents adding multiple Spawner components to the same GameObject
 public class Spawner : MonoBehaviour
 {
+    public int spawnCost = 1; // Cost in points to spawn an object
     public Transform spawnLocation;
     // Array of prefabs to spawn from
     public GameObject[] prefabs;
@@ -66,7 +67,7 @@ public class Spawner : MonoBehaviour
             // Assign the spawned instance the same name as the prefab for clarity
             instance.name = prefab.name;
 
-            PointManager.Instance.AddPoints(-1);
+            PointManager.Instance.AddPoints(-spawnCost); // Deduct points for spawning
             spawnedObjects.Add(instance);
         }
     }
