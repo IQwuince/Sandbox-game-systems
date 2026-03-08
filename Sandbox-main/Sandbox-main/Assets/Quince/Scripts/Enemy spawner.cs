@@ -8,7 +8,7 @@ public class EnemySpawner : MonoBehaviour
     public enum WaveState { Inactive, Active, Remaining }
 
     [Header("Spawn Settings")]
-    public GameObject enemyPrefab;
+    public GameObject[] enemyPrefab;
     public List<BoxCollider> spawnBoxes = new List<BoxCollider>();
     public AnimationCurve enemiesPerWaveCurve; // X: waveIndex, Y: enemyCount
     public AnimationCurve waveDurationCurve;   // X: waveIndex, Y: seconds
@@ -123,7 +123,12 @@ public class EnemySpawner : MonoBehaviour
             Random.Range(-size.z / 2, size.z / 2)
         );
         Vector3 spawnPos = center + box.transform.rotation * localPos;
-        GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+
+        // Choose a random slime prefab from the array
+        int randomIndex = Random.Range(0, enemyPrefab.Length);
+        GameObject prefab = enemyPrefab[randomIndex];
+
+        GameObject enemy = Instantiate(prefab, spawnPos, Quaternion.identity);
 
         // Register enemy with the spawner so it is tracked in the HashSet
         RegisterEnemy(enemy);

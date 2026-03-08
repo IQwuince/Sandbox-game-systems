@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 3578973083435399234}
   - component: {fileID: -5283712545376555431}
   m_Layer: 0
-  m_Name: Block
+  m_Name: Block 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -71,7 +71,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 637ab848c14814688b4dcec85eeac3cf, type: 2}
+  - {fileID: 2100000, guid: a97d8f0ebe5a24742939ea710a68bf7d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -140,6 +140,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79831ae605ed54f628ebbbb6ccaa3591, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowAutoWeld: 0
+  jointBreakForce: 1
+  jointBreakTorque: 1
 --- !u!114 &3578973083435399234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,6 +158,11 @@ MonoBehaviour:
   shouldPropagateDragEvents: 0
   shouldIgnoreRigidbodySettingFromDragger: 0
   removeFromParentAtAwake: 0
+  useGridSnapping: 0
+  gridSize: {x: 1, y: 1, z: 1}
+  snapOnReleaseOnly: 0
+  snapRotation: 0
+  rotationSnapAngle: {x: 90, y: 90, z: 90}
 --- !u!54 &-5283712545376555431
 Rigidbody:
   m_ObjectHideFlags: 0
